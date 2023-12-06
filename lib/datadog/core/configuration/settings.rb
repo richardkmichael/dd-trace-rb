@@ -317,27 +317,29 @@ module Datadog
             # This feature is safe and enabled by default on Ruby 2.x, but has a few caveats on Ruby 3.x.
             #
             # Caveat 1 (severe):
-            # On Ruby versions 3.0 (all), 3.1.0 to 3.1.3, and 3.2.0 to 3.2.2 this is disabled by default because it
+            # On Ruby versions 3.0 (all), 3.1.0 to 3.1.3, and 3.2.x < 3.2.2p59 this is disabled by default because it
             # can trigger a VM bug that causes a segmentation fault during garbage collection of Ractors
             # (https://bugs.ruby-lang.org/issues/18464). We don't recommend using this feature on such Rubies.
-            # This bug is fixed on Ruby versions 3.1.4, 3.2.3 and 3.3.0.
+            # This bug is fixed on Ruby versions 3.1.4, 3.2.2pl59 and 3.3.0.
             #
-            # Caveat 2 (annoyance):
+            # Caveat 2 (severe):
+            # Ruby 3.2.0 to 3.2.2 have a bug in the newobj tracepoint (https://bugs.ruby-lang.org/issues/19482,
+            # https://github.com/ruby/ruby/pull/7464) so that's an extra reason why it's not safe on those Rubies.
+            # This bug is fixed on Ruby versions 3.2.2pl68 and 3.3.0.
+            #
+            # Caveat 3 (annoyance):
             # On all known versions of Ruby 3.x, due to https://bugs.ruby-lang.org/issues/19112, when a ractor gets
             # garbage collected, Ruby will disable all active tracepoints, which this feature internally relies on.
             # Thus this feature is only usable if you're not using Ractors.
             #
-            # Caveat 3 (severe):
-            # Ruby 3.2.0 to 3.2.2 have a bug in the newobj tracepoint (https://bugs.ruby-lang.org/issues/19482,
-            # https://github.com/ruby/ruby/pull/7464) so that's an extra reason why it's not safe on those Rubies.
-            # This bug is fixed on Ruby versions 3.2.3 and 3.3.0.
-            #
-            # @default `true` on Ruby 2.x and 3.1.4+, 3.2.3+ and 3.3.0+; `false` for Ruby 3.0 and unpatched Rubies.
+            # @default `true` on Ruby 2.x and 3.1.4+, 3.2.2pl68+, 3.2.3+ and 3.3.0+; `false` for Ruby 3.0 and unpatched Rubies.
             option :allocation_counting_enabled do |o|
               o.default do
                 RUBY_VERSION.start_with?('2.') ||
                   (RUBY_VERSION.start_with?('3.1.') && RUBY_VERSION >= '3.1.4') ||
-                  (RUBY_VERSION.start_with?('3.2.') && RUBY_VERSION >= '3.2.3') ||
+                  (RUBY_VERSION.start_with?('3.2.') &&
+                    ((RUBY_VERSION == '3.2.2' && RUBY_PATCHLEVEL >= 68) ||
+                      RUBY_VERSION >= '3.2.3')) ||
                   RUBY_VERSION >= '3.3.'
               end
             end
