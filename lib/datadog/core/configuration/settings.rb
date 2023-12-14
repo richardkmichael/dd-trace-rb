@@ -332,7 +332,7 @@ module Datadog
             # garbage collected, Ruby will disable all active tracepoints, which this feature internally relies on.
             # Thus this feature is only usable if you're not using Ractors.
             #
-            # @default `true` on Ruby 2.x and 3.1.4+, 3.2.2pl68+, 3.2.3+ and 3.3.0+; `false` for Ruby 3.0 and unpatched Rubies.
+            # @default `true` on Ruby 2.x and 3.1.4+, 3.2.2pl68+, and 3.3.0+; `false` for Ruby 3.0 and unpatched Rubies.
             option :allocation_counting_enabled do |o|
               o.default do
                 RUBY_VERSION.start_with?('2.') ||
