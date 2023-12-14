@@ -500,23 +500,29 @@ RSpec.describe Datadog::Core::Configuration::Settings do
       describe '#allocation_counting_enabled' do
         subject(:allocation_counting_enabled) { settings.profiling.advanced.allocation_counting_enabled }
 
-        before { stub_const('RUBY_VERSION', testing_version) }
+        before do
+          stub_const('RUBY_VERSION', testing_version)
+          stub_const('RUBY_PATCHLEVEL', testing_patchlevel)
+        end
 
         context 'on Ruby 2.x' do
           let(:testing_version) { '2.3.0' }
+          let(:testing_patchlevel) { 1 }
           it { is_expected.to be true }
         end
 
-        ['3.0.0', '3.1.0', '3.1.3', '3.2.0', '3.2.2'].each do |broken_ruby|
+        ['3.0.0', '3.1.0', '3.1.3', '3.2.0', '3.2.2pl67'].each do |broken_ruby|
           context "on a Ruby 3 version affected by https://bugs.ruby-lang.org/issues/18464 (#{broken_ruby})" do
-            let(:testing_version) { broken_ruby }
+            let(:testing_version) { broken_ruby.split('pl')[0] }
+            let(:testing_patchlevel) { broken_ruby.split('pl')[1].to_i }
             it { is_expected.to be false }
           end
         end
 
-        ['3.1.4', '3.2.3', '3.3.0'].each do |fixed_ruby|
+        ['3.1.4', '3.2.2pl68', '3.2.3', '3.3.0'].each do |fixed_ruby|
           context "on a Ruby 3 version where https://bugs.ruby-lang.org/issues/18464 is fixed (#{fixed_ruby})" do
-            let(:testing_version) { fixed_ruby }
+            let(:testing_version) { fixed_ruby.split('pl')[0] }
+            let(:testing_patchlevel) { fixed_ruby.split('pl')[1].to_i }
             it { is_expected.to be true }
           end
         end
