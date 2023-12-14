@@ -503,7 +503,7 @@ RSpec.describe Datadog::Core::Configuration::Settings do
         before { stub_const('RUBY_VERSION', testing_version) }
 
         context 'on Ruby 2.x' do
-          let(:testing_version) { '2.3.0 ' }
+          let(:testing_version) { '2.3.0' }
           it { is_expected.to be true }
         end
 
